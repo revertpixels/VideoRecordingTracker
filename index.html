@@ -37,6 +37,10 @@
             --purple-dark: #9333ea;
             --orange: #f97316;
             --orange-dark: #ea580c;
+            --teal: #14b8a6;
+            --teal-dark: #0d9488;
+            --cyan: #06b6d4;
+            --cyan-dark: #0891b2;
             --dark: #1e293b;
             --dark-light: #334155;
             --gray-50: #f8fafc;
@@ -113,9 +117,40 @@
 
         /* Controls */
         .controls {
-            padding: 20px;
             background: white;
+        }
+
+        .controls-section {
+            padding: 20px;
             border-bottom: 1px solid var(--gray-200);
+        }
+
+        .controls-section.primary-section {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-bottom: 2px solid var(--gray-300);
+        }
+
+        .section-divider {
+            padding: 16px 20px;
+            background: var(--gray-50);
+            border-bottom: 2px solid var(--gray-300);
+            border-top: 2px solid var(--gray-300);
+        }
+
+        .section-heading {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--gray-700);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .section-heading i {
+            color: var(--primary);
+            font-size: 1rem;
         }
 
         .controls-row {
@@ -147,12 +182,13 @@
         .search-box input {
             width: 100%;
             padding: 12px 12px 12px 42px;
-            border: 1px solid var(--gray-300);
+            border: 2px solid var(--gray-300);
             border-radius: 10px;
             font-size: 0.95rem;
             transition: all 0.2s ease;
             background: white;
             color: var(--gray-900);
+            box-shadow: var(--shadow-sm);
         }
 
         .search-box input:focus {
@@ -237,6 +273,7 @@
 
         .btn:hover {
             box-shadow: var(--shadow-md);
+            transform: translateY(-1px);
         }
 
         .btn:active {
@@ -254,6 +291,24 @@
 
         .btn-primary:hover {
             background: var(--primary-dark);
+        }
+
+        .btn-info {
+            background: var(--cyan);
+            color: white;
+        }
+
+        .btn-info:hover {
+            background: var(--cyan-dark);
+        }
+
+        .btn-teal {
+            background: var(--teal);
+            color: white;
+        }
+
+        .btn-teal:hover {
+            background: var(--teal-dark);
         }
 
         .btn-success {
@@ -1032,8 +1087,12 @@
                 font-size: 1rem;
             }
 
-            .controls {
+            .controls-section {
                 padding: 24px 40px;
+            }
+
+            .section-divider {
+                padding: 20px 40px;
             }
 
             .controls-row {
@@ -1123,115 +1182,122 @@
 
         <!-- Controls -->
         <div class="controls">
-            <!-- Search Bar -->
-            <div class="controls-row">
-                <div class="search-box">
-                    <i class="fas fa-search search-icon"></i>
-                    <input type="text" id="searchInput" placeholder="Search by class number or title...">
-                </div>
-            </div>
-
-            <!-- Main Action Buttons -->
-            <div class="controls-row">
-                <!-- Statistics Dropdown -->
-                <div class="dropdown" id="statsDropdown">
-                    <button class="btn btn-primary dropdown-toggle" onclick="app.toggleDropdown('statsDropdown')">
-                        <i class="fas fa-chart-bar"></i>
-                        <span>Statistics</span>
-                        <i class="fas fa-chevron-down" style="font-size: 0.75rem; margin-left: auto;"></i>
-                    </button>
-                    <div class="dropdown-menu stats-dropdown-menu">
-                        <div class="stat-item total">
-                            <div class="stat-item-left">
-                                <div class="stat-item-icon">
-                                    <i class="fas fa-list"></i>
-                                </div>
-                                <div class="stat-item-label">Total Classes</div>
-                            </div>
-                            <div class="stat-item-value" id="stat-total">0</div>
-                        </div>
-                        <div class="stat-item pending">
-                            <div class="stat-item-left">
-                                <div class="stat-item-icon">
-                                    <i class="fas fa-clock"></i>
-                                </div>
-                                <div class="stat-item-label">Not Started</div>
-                            </div>
-                            <div class="stat-item-value" id="stat-pending">0</div>
-                        </div>
-                        <div class="stat-item recording">
-                            <div class="stat-item-left">
-                                <div class="stat-item-icon">
-                                    <i class="fas fa-circle"></i>
-                                </div>
-                                <div class="stat-item-label">Recording</div>
-                            </div>
-                            <div class="stat-item-value" id="stat-recording">0</div>
-                        </div>
-                        <div class="stat-item completed">
-                            <div class="stat-item-left">
-                                <div class="stat-item-icon">
-                                    <i class="fas fa-check-circle"></i>
-                                </div>
-                                <div class="stat-item-label">Uploaded</div>
-                            </div>
-                            <div class="stat-item-value" id="stat-uploaded">0</div>
-                        </div>
-                        <div class="stat-item problem">
-                            <div class="stat-item-left">
-                                <div class="stat-item-icon">
-                                    <i class="fas fa-exclamation-triangle"></i>
-                                </div>
-                                <div class="stat-item-label">Problems</div>
-                            </div>
-                            <div class="stat-item-value" id="stat-problem">0</div>
-                        </div>
+            <!-- Primary Controls Section -->
+            <div class="controls-section primary-section">
+                <!-- Search Bar -->
+                <div class="controls-row">
+                    <div class="search-box">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" id="searchInput" placeholder="Search by class number or title...">
                     </div>
                 </div>
 
-                <!-- Data Handling Dropdown -->
-                <div class="dropdown" id="dataDropdown">
-                    <button class="btn btn-success dropdown-toggle" onclick="app.toggleDropdown('dataDropdown')">
-                        <i class="fas fa-database"></i>
-                        <span>Data Handling</span>
-                        <i class="fas fa-chevron-down" style="font-size: 0.75rem; margin-left: auto;"></i>
-                    </button>
-                    <div class="dropdown-menu">
-                        <div class="dropdown-item" onclick="app.exportData()">
-                            <i class="fas fa-download"></i>
-                            <span>Export Backup</span>
+                <!-- Main Action Buttons -->
+                <div class="controls-row">
+                    <!-- Statistics Dropdown -->
+                    <div class="dropdown" id="statsDropdown">
+                        <button class="btn btn-info dropdown-toggle" onclick="app.toggleDropdown('statsDropdown')">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Statistics</span>
+                            <i class="fas fa-chevron-down" style="font-size: 0.75rem; margin-left: auto;"></i>
+                        </button>
+                        <div class="dropdown-menu stats-dropdown-menu">
+                            <div class="stat-item total">
+                                <div class="stat-item-left">
+                                    <div class="stat-item-icon">
+                                        <i class="fas fa-list"></i>
+                                    </div>
+                                    <div class="stat-item-label">Total Classes</div>
+                                </div>
+                                <div class="stat-item-value" id="stat-total">0</div>
+                            </div>
+                            <div class="stat-item pending">
+                                <div class="stat-item-left">
+                                    <div class="stat-item-icon">
+                                        <i class="fas fa-clock"></i>
+                                    </div>
+                                    <div class="stat-item-label">Not Started</div>
+                                </div>
+                                <div class="stat-item-value" id="stat-pending">0</div>
+                            </div>
+                            <div class="stat-item recording">
+                                <div class="stat-item-left">
+                                    <div class="stat-item-icon">
+                                        <i class="fas fa-circle"></i>
+                                    </div>
+                                    <div class="stat-item-label">Recording</div>
+                                </div>
+                                <div class="stat-item-value" id="stat-recording">0</div>
+                            </div>
+                            <div class="stat-item completed">
+                                <div class="stat-item-left">
+                                    <div class="stat-item-icon">
+                                        <i class="fas fa-check-circle"></i>
+                                    </div>
+                                    <div class="stat-item-label">Uploaded</div>
+                                </div>
+                                <div class="stat-item-value" id="stat-uploaded">0</div>
+                            </div>
+                            <div class="stat-item problem">
+                                <div class="stat-item-left">
+                                    <div class="stat-item-icon">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                    </div>
+                                    <div class="stat-item-label">Problems</div>
+                                </div>
+                                <div class="stat-item-value" id="stat-problem">0</div>
+                            </div>
                         </div>
-                        <div class="dropdown-item" onclick="document.getElementById('importFile').click()">
-                            <i class="fas fa-upload"></i>
-                            <span>Import Backup</span>
-                        </div>
-                        <div class="dropdown-item danger-item" onclick="app.resetAllData()">
-                            <i class="fas fa-redo"></i>
-                            <span>Reset All Progress</span>
+                    </div>
+
+                    <!-- Data Handling Dropdown -->
+                    <div class="dropdown" id="dataDropdown">
+                        <button class="btn btn-teal dropdown-toggle" onclick="app.toggleDropdown('dataDropdown')">
+                            <i class="fas fa-database"></i>
+                            <span>Data Handling</span>
+                            <i class="fas fa-chevron-down" style="font-size: 0.75rem; margin-left: auto;"></i>
+                        </button>
+                        <div class="dropdown-menu">
+                            <div class="dropdown-item" onclick="app.exportData()">
+                                <i class="fas fa-download"></i>
+                                <span>Export Backup</span>
+                            </div>
+                            <div class="dropdown-item" onclick="document.getElementById('importFile').click()">
+                                <i class="fas fa-upload"></i>
+                                <span>Import Backup</span>
+                            </div>
+                            <div class="dropdown-item danger-item" onclick="app.resetAllData()">
+                                <i class="fas fa-redo"></i>
+                                <span>Reset All Progress</span>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Filter & Sort Row -->
-            <div class="controls-row">
-                <div class="select-wrapper">
-                    <select id="filterStatus">
-                        <option value="all">All Status</option>
-                        <option value="Not Started">Not Started</option>
-                        <option value="Recording">Recording</option>
-                        <option value="Recorded">Recorded</option>
-                        <option value="Problem">Problem</option>
-                        <option value="Uploaded">Uploaded</option>
-                    </select>
-                </div>
-                <div class="select-wrapper sort-wrapper">
-                    <select id="sortBy">
-                        <option value="number-desc">Class # (High to Low)</option>
-                        <option value="number-asc">Class # (Low to High)</option>
-                        <option value="date-desc">Date (Newest First)</option>
-                        <option value="date-asc">Date (Oldest First)</option>
-                    </select>
+
+            <!-- Filter & Sort Section -->
+            <div class="controls-section">
+                <!-- Filter & Sort Row -->
+                <div class="controls-row">
+                    <div class="select-wrapper">
+                        <select id="filterStatus">
+                            <option value="all">All Status</option>
+                            <option value="Not Started">Not Started</option>
+                            <option value="Recording">Recording</option>
+                            <option value="Recorded">Recorded</option>
+                            <option value="Problem">Problem</option>
+                            <option value="Uploaded">Uploaded</option>
+                        </select>
+                    </div>
+                    <div class="select-wrapper sort-wrapper">
+                        <select id="sortBy">
+                            <option value="number-desc">Class # (High to Low)</option>
+                            <option value="number-asc">Class # (Low to High)</option>
+                            <option value="date-desc">Date (Newest First)</option>
+                            <option value="date-asc">Date (Oldest First)</option>
+                        </select>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1478,7 +1544,7 @@
                 this.loadData();
                 this.loadSortPreference();
                 this.setupEventListeners();
-                this.render();
+                this.filterAndSort(); // Apply initial sort
                 this.updateStats();
             },
 
@@ -1855,7 +1921,7 @@
                             this.data = imported;
                             this.filteredData = [...this.data];
                             this.saveData();
-                            this.render();
+                            this.filterAndSort();
                             this.closeAllDropdowns();
                             this.showToast('Data imported successfully!', 'success');
                         } else {
@@ -1881,7 +1947,7 @@
                         }));
                         this.filteredData = [...this.data];
                         this.saveData();
-                        this.render();
+                        this.filterAndSort();
                         this.closeModal();
                         this.showToast('All progress has been reset!', 'success');
                     }
