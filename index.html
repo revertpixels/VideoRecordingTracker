@@ -3,7 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#6366f1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Video Tracker">
     <title>Video Recording Tracker - CRWill</title>
+    
+    <!-- Favicons -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%236366f1'/><text x='50' y='70' font-size='60' text-anchor='middle' fill='white' font-family='Arial'>📹</text></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='40' fill='%236366f1'/><text x='90' y='130' font-size='100' text-anchor='middle' fill='white'>📹</text></svg>">
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -24,6 +33,10 @@
             --danger-dark: #dc2626;
             --info: #3b82f6;
             --info-dark: #2563eb;
+            --purple: #a855f7;
+            --purple-dark: #9333ea;
+            --orange: #f97316;
+            --orange-dark: #ea580c;
             --dark: #1e293b;
             --dark-light: #334155;
             --gray-50: #f8fafc;
@@ -167,6 +180,19 @@
             font-size: 0.75rem;
         }
 
+        .select-wrapper.sort-wrapper::before {
+            content: 'Sort by:';
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-600);
+            font-size: 0.85rem;
+            font-weight: 600;
+            pointer-events: none;
+            z-index: 1;
+        }
+
         select {
             width: 100%;
             padding: 12px 36px 12px 12px;
@@ -179,6 +205,10 @@
             appearance: none;
             color: var(--gray-900);
             font-weight: 500;
+        }
+
+        .sort-wrapper select {
+            padding-left: 80px;
         }
 
         select:focus {
@@ -329,6 +359,14 @@
             color: var(--primary);
         }
 
+        .dropdown-item.danger-item i {
+            color: var(--danger);
+        }
+
+        .dropdown-item.danger-item:hover {
+            background: #fef2f2;
+        }
+
         /* Stats Dropdown */
         .stats-dropdown-menu {
             min-width: 280px;
@@ -365,7 +403,7 @@
         }
 
         .stat-item.total .stat-item-icon { background: var(--primary); }
-        .stat-item.pending .stat-item-icon { background: var(--warning); }
+        .stat-item.pending .stat-item-icon { background: var(--gray-500); }
         .stat-item.recording .stat-item-icon { background: var(--info); }
         .stat-item.completed .stat-item-icon { background: var(--success); }
         .stat-item.problem .stat-item-icon { background: var(--danger); }
@@ -453,7 +491,7 @@
             align-items: center;
         }
 
-        .view-details-btn {
+        .view-details-btn, .edit-remarks-btn {
             background: var(--primary);
             color: white;
             border: none;
@@ -470,13 +508,29 @@
             box-shadow: var(--shadow-sm);
         }
 
-        .view-details-btn:hover {
+        .view-details-btn:hover, .edit-remarks-btn:hover {
             background: var(--primary-dark);
             box-shadow: var(--shadow-md);
         }
 
-        .view-details-btn:active {
+        .view-details-btn:active, .edit-remarks-btn:active {
             transform: translateY(1px);
+        }
+
+        .edit-remarks-btn {
+            background: var(--success);
+        }
+
+        .edit-remarks-btn:hover {
+            background: var(--success-dark);
+        }
+
+        .edit-remarks-btn.has-remarks {
+            background: var(--warning);
+        }
+
+        .edit-remarks-btn.has-remarks:hover {
+            background: var(--warning-dark);
         }
 
         .card-status {
@@ -493,9 +547,9 @@
             letter-spacing: 0.5px;
         }
 
-        .status-select-card {
+        .status-select-card, .status-select {
             width: 100%;
-            padding: 12px 36px 12px 12px;
+            padding: 12px 36px 12px 42px;
             border: 1px solid var(--gray-300);
             border-radius: 10px;
             font-size: 0.95rem;
@@ -504,47 +558,101 @@
             font-weight: 600;
             appearance: none;
             transition: all 0.2s ease;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
             background-repeat: no-repeat;
-            background-position: right 12px center;
+            background-position: left 12px center, right 12px center;
+            background-size: 20px, 12px;
         }
 
-        .status-select-card:focus {
+        /* Status Colors */
+        .status-select-card[data-status="Not Started"],
+        .status-select[data-status="Not Started"] {
+            color: var(--gray-700);
+            border-color: var(--gray-400);
+            background-color: var(--gray-50);
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2364748b'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z'/%3E%3C/svg%3E"), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+        }
+
+        .status-select-card[data-status="Recording"],
+        .status-select[data-status="Recording"] {
+            color: var(--info-dark);
+            border-color: var(--info);
+            background-color: #eff6ff;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%233b82f6'%3E%3Ccircle cx='12' cy='12' r='8'/%3E%3C/svg%3E"), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+        }
+
+        .status-select-card[data-status="Recorded"],
+        .status-select[data-status="Recorded"] {
+            color: var(--purple-dark);
+            border-color: var(--purple);
+            background-color: #faf5ff;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23a855f7'%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E"), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+        }
+
+        .status-select-card[data-status="Problem"],
+        .status-select[data-status="Problem"] {
+            color: var(--danger-dark);
+            border-color: var(--danger);
+            background-color: #fef2f2;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ef4444'%3E%3Cpath d='M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z'/%3E%3C/svg%3E"), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+        }
+
+        .status-select-card[data-status="Uploaded"],
+        .status-select[data-status="Uploaded"] {
+            color: var(--success-dark);
+            border-color: var(--success);
+            background-color: #f0fdf4;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2322c55e'%3E%3Cpath d='M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z'/%3E%3C/svg%3E"), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+        }
+
+        .status-select-card:focus, .status-select:focus {
             outline: none;
-            border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
         }
 
-        .card-remarks {
+        /* Remarks Display */
+        .remarks-display {
             margin-top: 14px;
+            padding: 12px;
+            background: var(--gray-50);
+            border: 1px solid var(--gray-200);
+            border-radius: 10px;
+            font-size: 0.9rem;
+            color: var(--gray-700);
+            line-height: 1.5;
+            position: relative;
+            animation: slideIn 0.3s ease;
         }
 
-        .card-remarks label {
-            display: block;
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                max-height: 0;
+            }
+            to {
+                opacity: 1;
+                max-height: 200px;
+            }
+        }
+
+        .remarks-display-label {
             font-size: 0.75rem;
             font-weight: 600;
             color: var(--gray-600);
-            margin-bottom: 8px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
-        .remarks-input-card {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid var(--gray-300);
-            border-radius: 10px;
-            font-size: 0.9rem;
-            font-family: inherit;
-            resize: vertical;
-            min-height: 70px;
-            transition: all 0.2s ease;
+        .remarks-display-label i {
+            color: var(--success);
         }
 
-        .remarks-input-card:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        .remarks-display-text {
+            color: var(--gray-900);
+            font-weight: 500;
         }
 
         /* Table View for Desktop */
@@ -601,48 +709,13 @@
         }
 
         .status-select {
-            width: 100%;
-            max-width: 160px;
-            padding: 10px 32px 10px 10px;
-            border-radius: 8px;
-            border: 1px solid var(--gray-300);
-            font-size: 0.875rem;
-            cursor: pointer;
-            font-weight: 600;
-            appearance: none;
-            transition: all 0.2s ease;
-            background: white;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 10px center;
-        }
-
-        .status-select:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-        }
-
-        .remarks-input {
-            width: 100%;
-            max-width: 280px;
-            padding: 10px;
-            border: 1px solid var(--gray-300);
+            max-width: 180px;
+            padding: 10px 32px 10px 38px;
             border-radius: 8px;
             font-size: 0.875rem;
-            font-family: inherit;
-            resize: vertical;
-            min-height: 44px;
-            transition: all 0.2s ease;
         }
 
-        .remarks-input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-        }
-
-        .view-icon-btn {
+        .view-icon-btn, .edit-icon-btn {
             background: var(--primary);
             color: white;
             border: none;
@@ -656,15 +729,49 @@
             font-size: 1rem;
             transition: all 0.2s ease;
             box-shadow: var(--shadow-sm);
+            margin: 0 4px;
         }
 
-        .view-icon-btn:hover {
+        .view-icon-btn:hover, .edit-icon-btn:hover {
             background: var(--primary-dark);
             box-shadow: var(--shadow-md);
         }
 
-        .view-icon-btn:active {
+        .view-icon-btn:active, .edit-icon-btn:active {
             transform: translateY(1px);
+        }
+
+        .edit-icon-btn {
+            background: var(--success);
+        }
+
+        .edit-icon-btn:hover {
+            background: var(--success-dark);
+        }
+
+        .edit-icon-btn.has-remarks {
+            background: var(--warning);
+        }
+
+        .edit-icon-btn.has-remarks:hover {
+            background: var(--warning-dark);
+        }
+
+        .table-remarks-display {
+            max-width: 300px;
+            padding: 8px 12px;
+            background: var(--gray-50);
+            border: 1px solid var(--gray-200);
+            border-radius: 8px;
+            font-size: 0.875rem;
+            color: var(--gray-700);
+            line-height: 1.4;
+            margin-top: 8px;
+        }
+
+        .table-remarks-display i {
+            color: var(--success);
+            margin-right: 6px;
         }
 
         /* Modal */
@@ -786,6 +893,44 @@
         }
 
         .modal-footer {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        /* Remarks Modal */
+        .remarks-modal-body {
+            margin-bottom: 24px;
+        }
+
+        .remarks-modal-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--gray-700);
+            margin-bottom: 10px;
+        }
+
+        .remarks-modal-textarea {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid var(--gray-300);
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 150px;
+            transition: all 0.2s ease;
+            color: var(--gray-900);
+        }
+
+        .remarks-modal-textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .remarks-modal-footer {
             display: flex;
             gap: 12px;
             justify-content: flex-end;
@@ -1017,7 +1162,7 @@
                         <div class="stat-item recording">
                             <div class="stat-item-left">
                                 <div class="stat-item-icon">
-                                    <i class="fas fa-record-vinyl"></i>
+                                    <i class="fas fa-circle"></i>
                                 </div>
                                 <div class="stat-item-label">Recording</div>
                             </div>
@@ -1060,6 +1205,10 @@
                             <i class="fas fa-upload"></i>
                             <span>Import Backup</span>
                         </div>
+                        <div class="dropdown-item danger-item" onclick="app.resetAllData()">
+                            <i class="fas fa-redo"></i>
+                            <span>Reset All Progress</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1076,7 +1225,7 @@
                         <option value="Uploaded">Uploaded</option>
                     </select>
                 </div>
-                <div class="select-wrapper">
+                <div class="select-wrapper sort-wrapper">
                     <select id="sortBy">
                         <option value="number-desc">Class # (High to Low)</option>
                         <option value="number-asc">Class # (Low to High)</option>
@@ -1084,14 +1233,6 @@
                         <option value="date-asc">Date (Oldest First)</option>
                     </select>
                 </div>
-            </div>
-
-            <!-- Reset Button -->
-            <div class="controls-row">
-                <button class="btn btn-warning" onclick="app.resetAllData()" style="width: 100%;">
-                    <i class="fas fa-redo"></i>
-                    <span>Reset All Progress</span>
-                </button>
             </div>
         </div>
 
@@ -1110,9 +1251,8 @@
                     <tr>
                         <th>Class #</th>
                         <th>Title</th>
-                        <th style="text-align: center;">Details</th>
+                        <th style="text-align: center;">Actions</th>
                         <th>Status</th>
-                        <th>Remarks</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody">
@@ -1133,6 +1273,34 @@
             </div>
             <div class="modal-body" id="detailsBody">
                 <!-- Details will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Remarks Modal -->
+    <div class="modal" id="remarksModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span id="remarksModalTitle">Edit Remarks</span>
+                <button class="modal-close" onclick="app.closeRemarksModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body remarks-modal-body">
+                <label class="remarks-modal-label">
+                    <i class="fas fa-pencil-alt"></i> Add or edit your remarks below:
+                </label>
+                <textarea id="remarksTextarea" class="remarks-modal-textarea" placeholder="Enter your remarks here..."></textarea>
+            </div>
+            <div class="remarks-modal-footer">
+                <button class="btn btn-secondary" onclick="app.closeRemarksModal()">
+                    <i class="fas fa-times"></i>
+                    <span>Cancel</span>
+                </button>
+                <button class="btn btn-success" onclick="app.saveRemarks()">
+                    <i class="fas fa-save"></i>
+                    <span>Save Remarks</span>
+                </button>
             </div>
         </div>
     </div>
@@ -1304,9 +1472,11 @@
         const app = {
             data: [],
             filteredData: [],
+            currentEditingNumber: null,
 
             init() {
                 this.loadData();
+                this.loadSortPreference();
                 this.setupEventListeners();
                 this.render();
                 this.updateStats();
@@ -1331,6 +1501,17 @@
                 localStorage.setItem('videoTrackerData', JSON.stringify(this.data));
             },
 
+            loadSortPreference() {
+                const savedSort = localStorage.getItem('videoTrackerSort');
+                if (savedSort) {
+                    document.getElementById('sortBy').value = savedSort;
+                }
+            },
+
+            saveSortPreference(sortValue) {
+                localStorage.setItem('videoTrackerSort', sortValue);
+            },
+
             setupEventListeners() {
                 document.getElementById('searchInput').addEventListener('input', () => {
                     this.filterAndSort();
@@ -1340,7 +1521,8 @@
                     this.filterAndSort();
                 });
 
-                document.getElementById('sortBy').addEventListener('change', () => {
+                document.getElementById('sortBy').addEventListener('change', (e) => {
+                    this.saveSortPreference(e.target.value);
                     this.filterAndSort();
                 });
 
@@ -1413,6 +1595,16 @@
                 this.updateStats();
             },
 
+            getStatusIcon(status) {
+                switch(status) {
+                    case 'Recording': return '🔴';
+                    case 'Recorded': return '✅';
+                    case 'Problem': return '⚠️';
+                    case 'Uploaded': return '☁️';
+                    default: return '⏳';
+                }
+            },
+
             renderCards() {
                 const cardView = document.getElementById('cardView');
                 cardView.innerHTML = '';
@@ -1431,6 +1623,7 @@
                 }
 
                 this.filteredData.forEach(item => {
+                    const hasRemarks = item.remarks && item.remarks.trim() !== '';
                     const card = document.createElement('div');
                     card.className = 'class-card';
                     card.innerHTML = `
@@ -1443,24 +1636,32 @@
                                 <button class="view-details-btn" onclick="app.showDetails(${item.number})" title="View Details">
                                     <i class="fas fa-eye"></i>
                                 </button>
+                                <button class="edit-remarks-btn ${hasRemarks ? 'has-remarks' : ''}" 
+                                        onclick="app.openRemarksModal(${item.number})" 
+                                        title="${hasRemarks ? 'Edit Remarks' : 'Add Remarks'}">
+                                    <i class="fas fa-pen"></i>
+                                </button>
                             </div>
                         </div>
                         <div class="card-status">
                             <label>Status</label>
-                            <select class="status-select-card" onchange="app.updateStatus(${item.number}, this.value)">
-                                <option value="Not Started" ${item.status === 'Not Started' ? 'selected' : ''}>Not Started</option>
-                                <option value="Recording" ${item.status === 'Recording' ? 'selected' : ''}>Recording</option>
-                                <option value="Recorded" ${item.status === 'Recorded' ? 'selected' : ''}>Recorded</option>
-                                <option value="Problem" ${item.status === 'Problem' ? 'selected' : ''}>Problem</option>
-                                <option value="Uploaded" ${item.status === 'Uploaded' ? 'selected' : ''}>Uploaded</option>
+                            <select class="status-select-card" data-status="${item.status}" onchange="app.updateStatus(${item.number}, this.value)">
+                                <option value="Not Started" ${item.status === 'Not Started' ? 'selected' : ''}>⏳ Not Started</option>
+                                <option value="Recording" ${item.status === 'Recording' ? 'selected' : ''}>🔴 Recording</option>
+                                <option value="Recorded" ${item.status === 'Recorded' ? 'selected' : ''}>✅ Recorded</option>
+                                <option value="Problem" ${item.status === 'Problem' ? 'selected' : ''}>⚠️ Problem</option>
+                                <option value="Uploaded" ${item.status === 'Uploaded' ? 'selected' : ''}>☁️ Uploaded</option>
                             </select>
                         </div>
-                        <div class="card-remarks">
-                            <label>Remarks</label>
-                            <textarea class="remarks-input-card" 
-                                      placeholder="Add remarks..."
-                                      onchange="app.updateRemarks(${item.number}, this.value)">${item.remarks || ''}</textarea>
-                        </div>
+                        ${hasRemarks ? `
+                            <div class="remarks-display">
+                                <div class="remarks-display-label">
+                                    <i class="fas fa-sticky-note"></i>
+                                    Remarks
+                                </div>
+                                <div class="remarks-display-text">${item.remarks}</div>
+                            </div>
+                        ` : ''}
                     `;
                     cardView.appendChild(card);
                 });
@@ -1473,7 +1674,7 @@
                 if (this.filteredData.length === 0) {
                     tbody.innerHTML = `
                         <tr>
-                            <td colspan="5">
+                            <td colspan="4">
                                 <div class="empty-state">
                                     <div class="empty-state-icon">
                                         <i class="fas fa-inbox"></i>
@@ -1488,31 +1689,37 @@
                 }
 
                 this.filteredData.forEach(item => {
+                    const hasRemarks = item.remarks && item.remarks.trim() !== '';
                     const row = document.createElement('tr');
                     row.innerHTML = `
                         <td class="class-number">#${item.number}</td>
                         <td>
                             <div class="class-title">${item.title}</div>
+                            ${hasRemarks ? `
+                                <div class="table-remarks-display">
+                                    <i class="fas fa-sticky-note"></i>
+                                    ${item.remarks}
+                                </div>
+                            ` : ''}
                         </td>
                         <td style="text-align: center;">
                             <button class="view-icon-btn" onclick="app.showDetails(${item.number})" title="View Details">
                                 <i class="fas fa-eye"></i>
                             </button>
+                            <button class="edit-icon-btn ${hasRemarks ? 'has-remarks' : ''}" 
+                                    onclick="app.openRemarksModal(${item.number})" 
+                                    title="${hasRemarks ? 'Edit Remarks' : 'Add Remarks'}">
+                                <i class="fas fa-pen"></i>
+                            </button>
                         </td>
                         <td>
-                            <select class="status-select" onchange="app.updateStatus(${item.number}, this.value)">
-                                <option value="Not Started" ${item.status === 'Not Started' ? 'selected' : ''}>Not Started</option>
-                                <option value="Recording" ${item.status === 'Recording' ? 'selected' : ''}>Recording</option>
-                                <option value="Recorded" ${item.status === 'Recorded' ? 'selected' : ''}>Recorded</option>
-                                <option value="Problem" ${item.status === 'Problem' ? 'selected' : ''}>Problem</option>
-                                <option value="Uploaded" ${item.status === 'Uploaded' ? 'selected' : ''}>Uploaded</option>
+                            <select class="status-select" data-status="${item.status}" onchange="app.updateStatus(${item.number}, this.value)">
+                                <option value="Not Started" ${item.status === 'Not Started' ? 'selected' : ''}>⏳ Not Started</option>
+                                <option value="Recording" ${item.status === 'Recording' ? 'selected' : ''}>🔴 Recording</option>
+                                <option value="Recorded" ${item.status === 'Recorded' ? 'selected' : ''}>✅ Recorded</option>
+                                <option value="Problem" ${item.status === 'Problem' ? 'selected' : ''}>⚠️ Problem</option>
+                                <option value="Uploaded" ${item.status === 'Uploaded' ? 'selected' : ''}>☁️ Uploaded</option>
                             </select>
-                        </td>
-                        <td>
-                            <textarea class="remarks-input" 
-                                      placeholder="Add remarks..."
-                                      onchange="app.updateRemarks(${item.number}, this.value)"
-                                      rows="2">${item.remarks || ''}</textarea>
                         </td>
                     `;
                     tbody.appendChild(row);
@@ -1556,21 +1763,54 @@
                 document.getElementById('detailsModal').classList.remove('active');
             },
 
+            openRemarksModal(number) {
+                const item = this.data.find(d => d.number === number);
+                if (!item) return;
+
+                this.currentEditingNumber = number;
+                const modal = document.getElementById('remarksModal');
+                const title = document.getElementById('remarksModalTitle');
+                const textarea = document.getElementById('remarksTextarea');
+
+                title.textContent = `Remarks - Class #${item.number}`;
+                textarea.value = item.remarks || '';
+                
+                modal.classList.add('active');
+                
+                // Focus textarea after a short delay to ensure modal is rendered
+                setTimeout(() => {
+                    textarea.focus();
+                }, 100);
+            },
+
+            closeRemarksModal() {
+                document.getElementById('remarksModal').classList.remove('active');
+                this.currentEditingNumber = null;
+            },
+
+            saveRemarks() {
+                if (this.currentEditingNumber === null) return;
+
+                const textarea = document.getElementById('remarksTextarea');
+                const remarks = textarea.value.trim();
+                
+                const item = this.data.find(d => d.number === this.currentEditingNumber);
+                if (item) {
+                    item.remarks = remarks;
+                    this.saveData();
+                    this.render();
+                    this.closeRemarksModal();
+                    this.showToast(remarks ? 'Remarks saved successfully!' : 'Remarks cleared!', 'success');
+                }
+            },
+
             updateStatus(number, status) {
                 const item = this.data.find(d => d.number === number);
                 if (item) {
                     item.status = status;
                     this.saveData();
-                    this.updateStats();
+                    this.render();
                     this.showToast('Status updated successfully!', 'success');
-                }
-            },
-
-            updateRemarks(number, remarks) {
-                const item = this.data.find(d => d.number === number);
-                if (item) {
-                    item.remarks = remarks;
-                    this.saveData();
                 }
             },
 
@@ -1630,6 +1870,7 @@
             },
 
             resetAllData() {
+                this.closeAllDropdowns();
                 this.showConfirmModal(
                     'Are you sure you want to reset all progress? This will reset all status to "Not Started" and clear all remarks. Class information will be preserved.',
                     () => {
@@ -1699,9 +1940,30 @@
             }
         });
 
+        document.getElementById('remarksModal').addEventListener('click', (e) => {
+            if (e.target.id === 'remarksModal') {
+                app.closeRemarksModal();
+            }
+        });
+
         document.getElementById('confirmModal').addEventListener('click', (e) => {
             if (e.target.id === 'confirmModal') {
                 app.closeModal();
+            }
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // ESC to close modals
+            if (e.key === 'Escape') {
+                app.closeDetailsModal();
+                app.closeRemarksModal();
+                app.closeModal();
+            }
+            // Ctrl/Cmd + S to save remarks
+            if ((e.ctrlKey || e.metaKey) && e.key === 's' && document.getElementById('remarksModal').classList.contains('active')) {
+                e.preventDefault();
+                app.saveRemarks();
             }
         });
     </script>
